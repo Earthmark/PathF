@@ -8,7 +8,11 @@ namespace Path
 {
 	public sealed class Character
 	{
-		public Stats Stats { get; private set; }
+		public StatSet Stats { get; private set; }
 
+		public Character()
+		{
+			Stats = new StatSet(this);
+		}
 	}
 }
