@@ -1,87 +1,68 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
+using System.ComponentModel.Composition.Hosting;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Path
 {
-    public sealed class Stats
-    {
-    }
+	public enum SpecStat
+	{
+		ArmorBonus,
+		ShieldBonus,
+		NaturalArmor,
+		DeflectionMod,
 
-    public abstract class Stat
-    {
-        protected Stats stats;
+	}
 
-        public abstract int Score { get; }
+	public sealed class Stats
+	{
+		private readonly Dictionary<Type, Stat> stats;
+		private readonly Dictionary<SpecStat, int> specStats;
 
-        protected Stat(Stats stats)
-        {
-            this.stats = stats;
-        }
-    }
+		public T Get<T>() where T : Stat
+		{
+			return (T)stats[typeof(T)];
+		}
 
-    #region Abilities
+		public int Get(SpecStat stat)
+		{
+			int num;
+			specStats.TryGetValue(stat, out num);
+			return num;
+		}
 
-    public abstract class Ability : Stat
-    {
-        public override int Score
-        {
-            get { return BaseScore + TempAdjustment; }
-        }
+		public int Add(SpecStat stat, int num)
+		{
+			int cur;
+			specStats.TryGetValue(stat, out cur);
+			num += cur;
+			specStats[stat] = num;
+			return num;
+		}
 
-        public int Modifier
-        {
-            get
-            {
-                var num = (Score - 10.0) / 2.0;
-                return (int) (num < 0.0 ? num - 1.0 : num) + TempModifier;
-            }
-        }
+		public Stats()
+		{
+			using(var container = new CompositionContainer(new AssemblyCatalog(typeof(Stats).Assembly)))
+			{
+				var enumer = container.GetExportedValues<Stat>();
 
-        public int BaseScore { get; private set; }
+				stats = enumer.ToDictionary(k => k.GetType());
+			}
+			specStats = new Dictionary<SpecStat, int>();
+		}
+	}
 
-        public int TempAdjustment { get; set; }
+	[InheritedExport]
+	public abstract class Stat
+	{
+		protected readonly Character Character;
 
-        public int TempModifier { get; set; }
-
-        public Ability(Stats stats, int baseScore)
-            : base(stats)
-        {
-            BaseScore = baseScore;
-        }
-    }
-
-    public sealed class Strength : Ability
-    {
-        public Strength(Stats stats, int baseScore) : base(stats, baseScore) { }
-    }
-
-    public sealed class Dexterity : Ability
-    {
-        public Dexterity(Stats stats, int baseScore) : base(stats, baseScore) { }
-    }
-
-    public sealed class Constitution : Ability
-    {
-        public Constitution(Stats stats, int baseScore) : base(stats, baseScore) { }
-    }
-
-    public sealed class Intelligence : Ability
-    {
-        public Intelligence(Stats stats, int baseScore) : base(stats, baseScore) { }
-    }
-
-    public sealed class Wisdom : Ability
-    {
-        public Wisdom(Stats stats, int baseScore) : base(stats, baseScore) { }
-    }
-
-    public sealed class Chrisma : Ability
-    {
-        public Chrisma(Stats stats, int baseScore) : base(stats, baseScore) { }
-    }
-
-    #endregion
+		protected Stat(Character character)
+		{
+			this.Character = character;
+		}
+	}
 }

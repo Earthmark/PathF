@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace Path
 {
-    public sealed class Character
-    {
-        public Stats Abilities { get; private set; }
-    }
+	public sealed class Character
+	{
+		public Stats Stats { get; private set; }
+
+	}
 }
