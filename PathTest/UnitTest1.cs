@@ -11,6 +11,9 @@ namespace PathTest
 		public void TestMethod1()
 		{
 			var character = new Character();
+
+		    var stat = character.Stats[DynamicMethods.ArmorClass];
+		    
 		}
 	}
 }

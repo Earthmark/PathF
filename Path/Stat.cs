@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.ComponentModel.Composition.Hosting;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Path
 {
@@ -61,6 +56,8 @@ namespace Path
 		ArmorBonus,
 		ShieldBonus,
 		DeflectionModifier,
+
+        Size,
 	}
 
 	public delegate float Retriever(Character character);
@@ -91,8 +88,8 @@ namespace Path
 
 		private static float AbilityChange(float score)
 		{
-			var num = (score - 10.0) / 2.0;
-			return (int)(num < 0.0 ? num - 1.0 : num);
+			var num = (score - 10f) / 2f;
+		    return (int) num;
 		}
 
 		[Export(typeof(Retriever))]
@@ -174,5 +171,40 @@ namespace Path
 				sta[StrengthModifier] + 10;
 			//Add size modifier.
 		}
+
+        [Export(typeof(Retriever))]
+	    public static float ArmorClass(Character character)
+        {
+            var sta = character.Stats;
+	        return sta[StaticStats.ArmorBonus] +
+	               sta[StaticStats.ShieldBonus] +
+	               sta[DexterityModifier] +
+	               sta[StaticStats.NaturalArmor] +
+	               sta[StaticStats.DeflectionModifier] +
+	               10f;
+	        //add size
+        }
+
+        [Export(typeof(Retriever))]
+	    public static float TouchArmorClass(Character character)
+        {
+            var sta = character.Stats;
+            return sta[DexterityModifier] +
+                   sta[StaticStats.DeflectionModifier] +
+                   10f;
+            //add size
+	    }
+
+        [Export(typeof(Retriever))]
+        public static float FlatFootArmorClass(Character character)
+        {
+            var sta = character.Stats;
+            return sta[StaticStats.ArmorBonus] +
+                   sta[StaticStats.ShieldBonus] +
+                   sta[StaticStats.NaturalArmor] +
+                   sta[StaticStats.DeflectionModifier] +
+                   10f;
+            //add size
+        }
 	}
 }
